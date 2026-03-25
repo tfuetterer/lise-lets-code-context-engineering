@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Context Engineering — Übungen</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        :root {
+            --lime: #d5ed00;
+            --teal: #94c6c5;
+            --red: #ff6b6b;
+            --dark: #1a1a2e;
+            --darker: #0f0f1a;
+            --text: #f0f0f0;
+            --text-muted: #a0a0b0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--darker);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* --- Header --- */
+        header {
+            padding: 3rem 2rem 2rem;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        header .event-badge {
+            display: inline-block;
+            background: var(--lime);
+            color: var(--darker);
+            padding: 0.3rem 1.2rem;
+            border-radius: 100px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            max-width: 700px;
+        }
+
+        /* --- Main --- */
+        main {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 1rem 2rem 4rem;
+        }
+
+        /* --- Section --- */
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .section-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .section-number.green { background: rgba(213,237,0,0.15); color: var(--lime); }
+        .section-number.teal { background: rgba(148,198,197,0.15); color: var(--teal); }
+        .section-number.red { background: rgba(255,107,107,0.15); color: var(--red); }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .section-intro {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            max-width: 700px;
+        }
+
+        /* --- Exercise Card --- */
+        .exercise {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 1.8rem 2rem;
+            margin-bottom: 1.2rem;
+            transition: border-color 0.3s;
+        }
+
+        .exercise:hover {
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .exercise-head {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .exercise-icon {
+            font-size: 1.8rem;
+            line-height: 1;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+
+        .exercise-head h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .exercise-head .difficulty {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 0.15rem 0.6rem;
+            border-radius: 100px;
+            margin-left: 0.6rem;
+            vertical-align: middle;
+        }
+
+        .difficulty.easy { background: rgba(213,237,0,0.15); color: var(--lime); }
+        .difficulty.medium { background: rgba(148,198,197,0.15); color: var(--teal); }
+        .difficulty.hard { background: rgba(255,107,107,0.15); color: var(--red); }
+
+        .exercise p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .exercise strong {
+            color: var(--text);
+        }
+
+        /* --- Steps --- */
+        .steps {
+            list-style: none;
+            padding: 0;
+            margin: 0.8rem 0;
+        }
+
+        .steps li {
+            padding: 0.4rem 0 0.4rem 2rem;
+            position: relative;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .steps li::before {
+            content: attr(data-step);
+            position: absolute;
+            left: 0;
+            color: var(--lime);
+            font-weight: 700;
+            font-size: 0.85rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+
+        /* --- Code Inline --- */
+        code {
+            background: rgba(255,255,255,0.08);
+            padding: 0.1rem 0.5rem;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            color: var(--lime);
+        }
+
+        /* --- Code Block --- */
+        .code-block {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 1.2rem 1.5rem;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            color: var(--text-muted);
+            white-space: pre;
+            overflow-x: auto;
+            margin: 0.8rem 0;
+        }
+
+        .code-block .key { color: var(--teal); }
+        .code-block .value { color: var(--lime); }
+        .code-block .comment { color: #6a6a80; }
+        .code-block .heading { color: var(--text); font-weight: 600; }
+
+        /* --- Hint --- */
+        .hint {
+            background: rgba(213,237,0,0.04);
+            border-left: 3px solid var(--lime);
+            padding: 0.8rem 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .hint strong {
+            color: var(--lime);
+        }
+
+        /* --- Divider --- */
+        .divider {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            margin: 3rem 0;
+        }
+
+        /* --- lise Logo --- */
+        .lise-logo {
+            position: fixed;
+            top: 1.8rem;
+            right: 2rem;
+            z-index: 100;
+        }
+
+        .lise-logo svg {
+            height: 24px;
+            width: auto;
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 700px) {
+            header { padding: 2rem 1.2rem 1.5rem; }
+            header h1 { font-size: 1.8rem; }
+            main { padding: 1rem 1.2rem 3rem; }
+            .exercise { padding: 1.2rem 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- lise Logo -->
+<div class="lise-logo">
+    <svg role="img" xmlns="http://www.w3.org/2000/svg" width="71.891" height="31" viewBox="0 0 71.890729 31" aria-label="lise GmbH Logo">
+        <g data-name="leaf">
+            <path fill="#ffffff" d="M70.55 0c-.856-.002-2.081.008-3.56.056-2.955.097-6.533.562-9.546 2.75-3.269 2.374-3.906 5.247-3.46 7.525 0 0-1.404.5-3.283.476v1.959c2.297-.118 4.546-.904 4.546-.904 1.98 1.226 7.362 2.37 11.377.114 3.902-2.194 4.756-6.52 5.103-9.06.18-1.317.163-2.9.163-2.9S71.405.004 70.55 0zm-1.861 1.868c-1.192 1.331-6.163 5.266-12.242 7.583-.044.017-.465-3.233 3.68-5.665 3.358-1.97 8.562-1.918 8.562-1.918Zm1.069.93s-.133 4.79-3.864 7.124c-4.228 2.645-8.234 1.096-8.19 1.08 4.211-1.572 9.248-4.716 12.054-8.204z"/>
+            <path fill="none" d="M68.689 1.868s-5.204-.053-8.563 1.918c-4.144 2.432-3.723 5.682-3.68 5.665 6.08-2.317 11.051-6.252 12.243-7.583Zm1.069.93c-2.806 3.488-7.843 6.632-12.054 8.204-.044.016 3.962 1.565 8.19-1.08 3.731-2.334 3.864-7.124 3.864-7.124z"/>
+        </g>
+        <path fill="#ffffff" data-name="lise" d="M9.716.017h-1.56v5.41h1.56Zm2.094 23.471C11.933 28.414 15.545 31 20.348 31c3.694 0 8.25-1.272 8.25-5.829 0-4.433-3.284-5.418-7.47-6.198-3.407-.739-7.02-1.272-7.02-4.638 0-2.997 3.202-4.064 6.075-4.064 3.53 0 6.198 1.56 6.24 5.377h1.56c0-4.802-3.326-6.731-7.8-6.731-3.57 0-7.634 1.231-7.634 5.418 0 4.31 3.612 5.254 7.265 5.993 3.612.739 7.224 1.272 7.224 4.843 0 3.654-3.94 4.474-6.69 4.474-3.818 0-6.732-2.257-6.978-6.157zm36.687-3.324c.287-6.034-2.668-11.247-9.277-11.247-6.362 0-9.4 5.623-9.317 11.41C29.82 26.158 33.063 31 39.22 31c5.008 0 8.292-2.71 9.113-7.635h-1.56c-.739 3.9-3.571 6.28-7.553 6.28-5.213 0-7.84-4.515-7.758-9.481zm-17.035-1.355c.329-4.187 3.079-8.538 7.758-8.538 4.844 0 7.635 4.105 7.717 8.538zM4.898 31v-1.628c-.44 0-1.693-.147-2.474-.815-.865-.74-.864-2.068-.864-2.54v-26H0v26.267C0 28.06.683 31 4.898 31m-.07-22.063v1.629c.44 0 1.694.146 2.475.814.864.74.863 2.068.863 2.54V31h1.56V13.653c0-1.775-.682-4.716-4.897-4.716"/>
+    </svg>
+</div>
+
+<header>
+    <div class="event-badge">Let's Code</div>
+    <h1>Context Engineering — Übungen</h1>
+    <p>
+        Hier könnt ihr Skills, Sub-Agents und MCP-Server selbst ausprobieren.
+        Ihr braucht dafür kein Programmierwissen — nur ein Tool eurer Wahl
+        (Claude Code, Cursor, Copilot oder Codex CLI) und Lust zum Experimentieren.
+    </p>
+</header>
+
+<main>
+
+    <!-- ============================= -->
+    <!-- TEIL 1: SKILLS -->
+    <!-- ============================= -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-number green">1</div>
+            <h2>Skills — Eigene Rezepte schreiben</h2>
+        </div>
+        <p class="section-intro">
+            Ein Skill ist eine Textdatei mit Anweisungen, die der KI-Agent befolgt.
+            Wie ein Rezept: einmal geschrieben, immer wieder nutzbar.
+        </p>
+
+        <!-- Nicht-Techies: Einstieg -->
+        <div class="exercise">
+            <div class="exercise-head">
+                <div class="exercise-icon">📧</div>
+                <div>
+                    <h3>E-Mail-Schreiber <span class="difficulty easy">Nicht-Techies · Einstieg</span></h3>
+                </div>
+            </div>
+            <p>Erstellt einen Skill, der professionelle E-Mails in eurem Unternehmensstil schreibt.</p>
+            <ol class="steps">
+                <li data-step="1.">Legt die Datei <code>.claude/skills/email-schreiber/SKILL.md</code> an</li>
+                <li data-step="2.">Schreibt Frontmatter mit Name und Beschreibung</li>
+                <li data-step="3.">Definiert Regeln: Anrede, Tonalität, Signatur, max. Länge</li>
+                <li data-step="4.">Testet den Skill: <em>„Schreibe eine E-Mail an einen Kunden, der nach dem Projektstand fragt."</em></li>
+            </ol>
+            <div class="code-block"><span class="comment">---</span>
+<span class="key">name:</span> <span class="value">email-schreiber</span>
+<span class="key">description:</span> <span class="value">Schreibt professionelle E-Mails im lise-Stil.</span>
+<span class="comment">---</span>
+
+<span class="heading"># E-Mail schreiben</span>
+
+Schreibe eine professionelle E-Mail nach diesen Regeln:
+
+<span class="value">1.</span> Beginne mit "Hallo [Name]," — kein "Sehr geehrte/r"
+<span class="value">2.</span> Halte den Ton freundlich, aber professionell
+<span class="value">3.</span> Maximal 5 Sätze im Hauptteil
+<span class="value">4.</span> Ende mit "Viele Grüße" und dem eigenen Namen
+<span class="value">5.</span> Vermeide Floskeln wie "hiermit" oder "bezugnehmend auf"</div>
+            <div class="hint">
+                <strong>Tipp:</strong> Probiert danach verschiedene Szenarien — Absage, Terminvorschlag, Nachfrage. Ist das Ergebnis jedes Mal im richtigen Stil?
+            </div>
+        </div>
+
+        <!-- Nicht-Techies: Fortgeschritten -->
+        <div class="exercise">
+            <div class="exercise-head">
+                <div class="exercise-icon">📱</div>
+                <div>
+                    <h3>Social-Media-Post-Generator <span class="difficulty medium">Nicht-Techies · Fortgeschritten</span></h3>
+                </div>
+            </div>
+            <p>Erstellt einen Skill, der aus einem Thema einen LinkedIn-Post im Unternehmensstil generiert.</p>
+            <ol class="steps">
+                <li data-step="1.">Legt <code>.claude/skills/linkedin-post/SKILL.md</code> an</li>
+                <li data-step="2.">Definiert Stil-Regeln: Länge, Tonalität, Hashtags, Zielgruppe</li>
+                <li data-step="3.">Fügt ein Beispiel hinzu, wie ein guter Post aussehen soll</li>
+                <li data-step="4.">Testet: <em>„Schreibe einen LinkedIn-Post über unsere neue Partnerschaft mit Microsoft."</em></li>
+            </ol>
+            <div class="hint">
+                <strong>Bonus:</strong> Könnt ihr den Skill so erweitern, dass er verschiedene Plattformen unterstützt? Z.B. per Argument: <code>/linkedin-post Twitter</code>
+            </div>
+        </div>
+
+        <!-- Techies: Einstieg -->
+        <div class="exercise">
+            <div class="exercise-head">
+                <div class="exercise-icon">💬</div>
+                <div>
+                    <h3>Commit-Message-Skill <span class="difficulty easy">Techies · Einstieg</span></h3>
+                </div>
+            </div>
+            <p>Erstellt einen Skill, der standardisierte Commit-Messages nach euren Team-Konventionen generiert.</p>
+            <ol class="steps">
+                <li data-step="1.">Legt <code>.claude/skills/commit/SKILL.md</code> an</li>
+                <li data-step="2.">Definiert Regeln: Sprache, Format, maximale Länge, Präsens vs. Vergangenheitsform</li>
+                <li data-step="3.">Fügt hinzu, dass vor dem Commit Tests laufen sollen</li>
+                <li data-step="4.">Testet: Macht eine kleine Änderung und sagt <em>„Committe das"</em></li>
+            </ol>
+            <div class="hint">
+                <strong>Tipp:</strong> Setzt <code>disable-model-invocation: true</code> im Frontmatter — dann wird der Skill nur manuell per <code>/commit</code> ausgelöst, nicht automatisch.
+            </div>
+        </div>
+
+        <!-- Techies: Fortgeschritten -->
+        <div class="exercise">
+            <div class="exercise-head">
+                <div class="exercise-icon">🚀</div>
+                <div>
+                    <h3>PR-Ersteller mit dynamischem Kontext <span class="difficulty medium">Techies · Fortgeschritten</span></h3>
+                </div>
+            </div>
+            <p>Erstellt einen Skill, der automatisch eine Pull Request mit Zusammenfassung und Testplan erstellt — basierend auf den aktuellen Änderungen.</p>
+            <ol class="steps">
+                <li data-step="1.">Legt <code>.claude/skills/create-pr/SKILL.md</code> an</li>
+                <li data-step="2.">Nutzt dynamischen Kontext: Der Skill soll per <code>!`git diff`</code> und <code>!`git log`</code> die aktuellen Änderungen einlesen, bevor er losarbeitet</li>
+                <li data-step="3.">Definiert ein PR-Format: Zusammenfassung, Änderungen, Testplan</li>
+                <li data-step="4.">Setzt <code>context: fork</code>, damit der Skill in einem eigenen Sub-Agent läuft</li>
+                <li data-step="5.">Testet: Macht Änderungen auf einem Branch und sagt <em>„/create-pr"</em></li>
+            </ol>
+            <div class="hint">
+                <strong>Tipp:</strong> Die <code>!`befehl`</code>-Syntax führt Shell-Befehle aus, <em>bevor</em> der Skill-Inhalt an den Agent geschickt wird. So hat er automatisch den aktuellen Diff als Kontext.
+            </div>
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ============================= -->
+    <!-- TEIL 2: SUB-AGENTS -->
+    <!-- ============================= -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-number teal">2</div>
+            <h2>Sub-Agents — Eigene Spezialisten bauen</h2>
+        </div>
+        <p class="section-intro">
+            Ein Sub-Agent ist ein Spezialist mit eigenem Wissen, eigenen Werkzeugen und
+            eigenem Verhalten. Wie ein Kollege, der genau weiß, was er tun soll.
+        </p>
+
+        <!-- Nicht-Techies: Einstieg -->
+        <div class="exercise">
+            <div class="exercise-head">
+                <div class="exercise-icon">🔍</div>
+                <div>
+                    <h3>Korrekturleser <span class="difficulty easy">Nicht-Techies · Einstieg</span></h3>
+                </div>
+            </div>
+            <p>Erstellt einen Sub-Agent, der Texte auf Fehler prüft — ohne sie zu verändern.</p>
+            <ol class="steps">
+                <li data-step="1.">Legt <code>.claude/agents/korrekturleser.md</code> an</li>
+                <li data-step="2.">Gebt ihm nur Lese-Rechte: <code>tools: Read, Grep, Glob</code></li>
+                <li data-step="3.">Schreibt einen System-Prompt, der beschreibt, worauf er achten soll</li>
+                <li data-step="4.">Testet: <em>„Prüfe die Datei angebot.md auf Rechtschreibfehler und unklare Formulierungen."</em></li>
+            </ol>
+            <div class="code-block"><span class="comment">---</span>
+<span class="key">name:</span>        <span class="value">korrekturleser</span>
+<span class="key">description:</span> <span class="value">Prüft Texte auf Rechtschreibung, Grammatik und</span>
+               <span class="value">verständliche Formulierungen. Verwende bei</span>
+               <span class="value">Textprüfungen und vor dem Versenden von Dokumenten.</span>
+<span class="key">tools:</span>       <span class="value">Read, Grep, Glob</span>
+<span class="key">model:</span>       <span class="value">sonnet</span>
+<span class="comment">---</span>
+
+Du bist ein erfahrener Korrekturleser für Geschäftstexte.
+
+<span class="heading">## Vorgehen</span>
+ <span class="value">1.</span> Lies den gesamten Text
+ <span class="value">2.</span> Prüfe Rechtschreibung und Grammatik
+ <span class="value">3.</span> Prüfe auf unklare oder umständliche Formulierungen
+ <span class="value">4.</span> Gib eine Liste aller Fundstellen mit Korrekturvorschlag
+
+<span class="heading">## Regeln</span>
+ <span class="value">-</span> Verändere den Text NICHT selbst
+ <span class="value">-</span> Gib zu jedem Fehler die Zeile und den Korrekturvorschlag an
+ <span class="value">-</span> Unterscheide: Fehler / Stilverbesserung / Vorschlag</div>
+            <div class="hint">
+                <strong>Tipp:</strong> Durch <code>tools: Read, Grep, Glob</code> kann der Agent Dateien lesen, aber nicht verändern — so geht nichts kaputt.
+            </div>
+        </div>
+
+        <!-- Nicht-Techies: Fortgeschritten -->
+        <div class="exercise">
+            <div class="exercise-head">
+                <div class="exercise-icon">📊</div>
+                <div>
+                    <h3>Angebots-Prüfer <span class="difficulty medium">Nicht-Techies · Fortgeschritten</span></h3>
+                </div>
+            </div>
+            <p>Erstellt einen Sub-Agent, der Angebotsdokumente auf Vollständigkeit und Konsistenz prüft.</p>
+            <ol class="steps">
+                <li data-step="1.">Legt <code>.claude/agents/angebots-pruefer.md</code> an</li>
+                <li data-step="2.">Definiert eine Checkliste: Ist ein Datum vorhanden? Stimmen die Summen? Fehlt die Unterschrift?</li>
+                <li data-step="3.">Gebt ihm Lese-Zugriff und Bash (damit er rechnen kann)</li>
+                <li data-step="4.">Testet ihn mit einem Beispiel-Angebot</li>
+            </ol>
+            <div class="hint">
+                <strong>Bonus:</strong> Fügt <code>memory: project</code> hinzu — dann merkt sich der Agent über mehrere Sessions hinweg, welche Fehler häufig vorkommen.
+            </div>
+        </div>
+
+        <!-- Techies: Einstieg -->
+        <div class="exercise">
+            <div class="exercise-head">
+                <div class="exercise-icon">🔎</div>
+                <div>
+                    <h3>Code-Reviewer <span class="difficulty easy">Techies · Einstieg</span></h3>
+                </div>
+            </div>
+            <p>Erstellt einen Sub-Agent, der Code-Änderungen auf Qualität und Best Practices prüft — ohne selbst etwas zu ändern.</p>
+            <ol class="steps">
+                <li data-step="1.">Legt <code>.claude/agents/code-reviewer.md</code> an</li>
+                <li data-step="2.">Gebt ihm nur Lese-Zugriff und Bash (für <code>git diff</code>): <code>tools: Read, Grep, Glob, Bash</code></li>
+                <li data-step="3.">Schreibt einen System-Prompt mit einer Review-Checkliste: Lesbarkeit, Sicherheit, Fehlerbehandlung, Tests</li>
+                <li data-step="4.">Definiert ein Ausgabeformat: Kritisch / Warnung / Vorschlag</li>
+                <li data-step="5.">Testet: Macht eine Änderung und sagt <em>„Reviewe meine letzten Änderungen"</em></li>
+            </ol>
+            <div class="hint">
+                <strong>Tipp:</strong> Da der Agent kein <code>Edit</code> oder <code>Write</code> hat, kann er nur Feedback geben — nicht versehentlich euren Code verändern.
+            </div>
+        </div>
+
+        <!-- Techies: Fortgeschritten -->
+        <div class="exercise">
+            <div class="exercise-head">
+                <div class="exercise-icon">🐛</div>
+                <div>
+                    <h3>Debugger mit Memory <span class="difficulty medium">Techies · Fortgeschritten</span></h3>
+                </div>
+            </div>
+            <p>Erstellt einen Sub-Agent, der Fehler analysiert, Fixes vorschlägt und sich über Sessions hinweg merkt, welche Probleme häufig auftreten.</p>
+            <ol class="steps">
+                <li data-step="1.">Legt <code>.claude/agents/debugger.md</code> an</li>
+                <li data-step="2.">Gebt ihm volle Werkzeuge: <code>tools: Read, Edit, Bash, Grep, Glob</code></li>
+                <li data-step="3.">Schreibt einen Prompt mit einem klaren Debugging-Ablauf: Fehler erfassen, reproduzieren, Root Cause finden, Fix implementieren, verifizieren</li>
+                <li data-step="4.">Aktiviert persistenten Speicher mit <code>memory: project</code></li>
+                <li data-step="5.">Testet ihn mehrmals — nach ein paar Sessions sollte er häufige Fehlerquellen in eurem Projekt kennen</li>
+            </ol>
+            <div class="hint">
+                <strong>Tipp:</strong> Fügt in den System-Prompt die Anweisung ein, dass der Agent nach jedem Debugging sein Memory aktualisieren soll. So baut er über die Zeit Wissen über euer Projekt auf.
+            </div>
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ============================= -->
+    <!-- TEIL 3: MCP-SERVER -->
+    <!-- ============================= -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-number red">3</div>
+            <h2>MCP-Server — Externe Werkzeuge anbinden</h2>
+        </div>
+        <p class="section-intro">
+            MCP-Server geben dem KI-Agenten Zugang zu externen Systemen — wie ein Handy,
+            mit dem er nachschlagen und kommunizieren kann. Ohne MCP-Server kennt der Agent
+            nur Dateien und das Terminal. Mit MCP-Server kann er z.B. Jira-Tickets lesen oder Figma-Designs abrufen.
+        </p>
+
+        <!-- Wie funktioniert das? -->
+        <div class="exercise" style="border-color: rgba(255,107,107,0.25); background: rgba(255,107,107,0.03);">
+            <div class="exercise-head">
+                <div class="exercise-icon">📖</div>
+                <div>
+                    <h3>Wie funktioniert ein MCP-Server?</h3>
+                </div>
+            </div>
+            <p>Ein MCP-Server ist ein kleines Programm, das zwischen eurem KI-Tool und einem externen Dienst vermittelt. So funktioniert das Einrichten:</p>
+            <ol class="steps">
+                <li data-step="1."><strong>MCP-Server finden:</strong> Sucht auf GitHub oder npm nach einem MCP-Server für euren Dienst (z.B. „jira mcp server" oder „figma mcp server")</li>
+                <li data-step="2."><strong>Konfiguration eintragen:</strong> Tragt den Server in die Konfigurationsdatei eures Tools ein — das ist eine JSON-Datei mit dem Startbefehl und ggf. API-Keys</li>
+                <li data-step="3."><strong>Tool neu starten:</strong> Nach dem Speichern der Konfiguration das Tool neu starten — der MCP-Server wird automatisch verbunden</li>
+                <li data-step="4."><strong>Testen:</strong> Stellt dem Agenten eine Frage, die den externen Dienst braucht</li>
+            </ol>
+            <p style="margin-top: 1rem;">Die Konfigurationsdatei sieht bei allen Tools ähnlich aus:</p>
+            <div class="code-block"><span class="comment">// Beispiel-Struktur (die konkreten Werte findet ihr</span>
+<span class="comment">// in der Doku des jeweiligen MCP-Servers)</span>
+
+{
+  <span class="key">"mcpServers"</span>: {
+    <span class="value">"name-des-servers"</span>: {
+      <span class="key">"type"</span>:    <span class="value">"stdio"</span>,
+      <span class="key">"command"</span>: <span class="value">"npx"</span>,           <span class="comment">// oder uvx, node, python ...</span>
+      <span class="key">"args"</span>:    [<span class="value">"paketname"</span>],  <span class="comment">// aus der Doku des Servers</span>
+      <span class="key">"env"</span>: {
+        <span class="value">"API_KEY"</span>: <span class="value">"euer-key"</span>   <span class="comment">// falls der Dienst einen braucht</span>
+      }
+    }
+  }
+}</div>
+            <p style="margin-top: 0.8rem;"><strong>Wo kommt das hin?</strong></p>
+            <ol class="steps">
+                <li data-step="·">Claude Code: <code>.claude/settings.json</code></li>
+                <li data-step="·">GitHub Copilot: <code>.vscode/settings.json</code></li>
+                <li data-step="·">Cursor: <code>.cursor/mcp.json</code></li>
+                <li data-step="·">Codex CLI: <code>.codex/config.toml</code></li>
+            </ol>
+        </div>
+
+        <!-- Übung 3.1 -->
+        <div class="exercise">
+            <div class="exercise-head">
+                <div class="exercise-icon">🎨</div>
+                <div>
+                    <h3>Figma anbinden <span class="difficulty medium">Für Designer & Nicht-Techies</span></h3>
+                </div>
+            </div>
+            <p>
+                Gebt eurem Agenten Zugriff auf eure Figma-Designs — damit er z.B. Farben,
+                Abstände oder Texte direkt aus Figma lesen kann.
+            </p>
+            <p><strong>Eure Aufgabe:</strong> Findet selbst heraus, wie man einen Figma-MCP-Server einrichtet, konfiguriert ihn und testet ihn.</p>
+            <div class="hint">
+                <strong>Ziel:</strong> Am Ende könnt ihr dem Agenten sagen: <em>„Welche Farben werden in meinem Figma-Design verwendet?"</em> — und er antwortet mit echten Daten aus Figma.
+            </div>
+        </div>
+
+        <!-- Übung 3.2 -->
+        <div class="exercise">
+            <div class="exercise-head">
+                <div class="exercise-icon">🎫</div>
+                <div>
+                    <h3>Jira anbinden <span class="difficulty medium">Für Techies</span></h3>
+                </div>
+            </div>
+            <p>
+                Gebt eurem Agenten Zugriff auf euer Jira — damit er Tickets lesen,
+                erstellen und aktualisieren kann.
+            </p>
+            <p><strong>Eure Aufgabe:</strong> Findet selbst heraus, wie man einen Jira/Atlassian-MCP-Server einrichtet, konfiguriert ihn und testet ihn.</p>
+            <div class="hint">
+                <strong>Ziel:</strong> Am Ende könnt ihr dem Agenten sagen: <em>„Welche offenen Tickets habe ich im Projekt XY?"</em> — und er antwortet mit echten Daten aus Jira.
+            </div>
+        </div>
+    </div>
+
+
+</main>
+
+</body>
+</html>

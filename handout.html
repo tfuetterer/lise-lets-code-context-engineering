@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Context Engineering — Handout</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        :root {
+            --lime: #d5ed00;
+            --teal: #94c6c5;
+            --red: #ff6b6b;
+            --dark: #1a1a2e;
+            --darker: #0f0f1a;
+            --text: #f0f0f0;
+            --text-muted: #a0a0b0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--darker);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            padding: 3rem 2rem 2rem;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        header .event-badge {
+            display: inline-block;
+            background: var(--lime);
+            color: var(--darker);
+            padding: 0.3rem 1.2rem;
+            border-radius: 100px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        header > p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-top: 0.8rem;
+            max-width: 700px;
+        }
+
+        main {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 1rem 2rem 4rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 3rem 0 0.5rem;
+            letter-spacing: -0.01em;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 2rem 0 0.5rem;
+            color: var(--text);
+        }
+
+        h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 1.2rem 0 0.4rem;
+            color: var(--text-muted);
+        }
+
+        p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.6rem; }
+
+        /* --- Tool Tabs --- */
+        .tool-section {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 1.2rem 1.5rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .tool-header:hover { background: rgba(255,255,255,0.03); }
+
+        .tool-header h3 {
+            margin: 0;
+            font-size: 1.15rem;
+        }
+
+        .tool-header .arrow {
+            margin-left: auto;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            transition: transform 0.3s;
+        }
+
+        .tool-section.open .tool-header .arrow { transform: rotate(90deg); }
+
+        .tool-body {
+            display: none;
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .tool-section.open .tool-body { display: block; }
+
+        /* --- Tables --- */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 0.8rem 0;
+            font-size: 0.9rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        td {
+            padding: 0.6rem 0.8rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            vertical-align: top;
+        }
+
+        td:first-child { color: var(--text); font-weight: 500; white-space: nowrap; }
+
+        /* --- Code --- */
+        code {
+            background: rgba(255,255,255,0.08);
+            padding: 0.1rem 0.45rem;
+            border-radius: 5px;
+            font-size: 0.82rem;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            color: var(--lime);
+        }
+
+        .code-block {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 1rem 1.3rem;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            color: var(--text-muted);
+            white-space: pre;
+            overflow-x: auto;
+            margin: 0.6rem 0;
+        }
+
+        .code-block .key { color: var(--teal); }
+        .code-block .val { color: var(--lime); }
+        .code-block .cmt { color: #6a6a80; }
+        .code-block .h { color: var(--text); font-weight: 600; }
+
+        .filename {
+            display: inline-block;
+            background: rgba(255,255,255,0.08);
+            padding: 0.15rem 0.7rem;
+            border-radius: 5px 5px 0 0;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            margin-bottom: -1px;
+        }
+
+        /* --- Dividers --- */
+        hr {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            margin: 3rem 0;
+        }
+
+        /* --- Section Colors --- */
+        .section-label {
+            display: inline-block;
+            padding: 0.15rem 0.7rem;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.3rem;
+        }
+
+        .label-green { background: rgba(213,237,0,0.15); color: var(--lime); }
+        .label-teal { background: rgba(148,198,197,0.15); color: var(--teal); }
+        .label-red { background: rgba(255,107,107,0.15); color: var(--red); }
+
+        /* --- Lists --- */
+        ul.clean { list-style: none; padding: 0; }
+        ul.clean li {
+            padding: 0.3rem 0 0.3rem 1.5rem;
+            position: relative;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        ul.clean li::before {
+            content: '·';
+            position: absolute;
+            left: 0.4rem;
+            color: var(--lime);
+            font-weight: 800;
+        }
+
+        /* --- lise Logo --- */
+        .lise-logo {
+            position: fixed;
+            top: 1.8rem;
+            right: 2rem;
+            z-index: 100;
+        }
+
+        .lise-logo svg { height: 24px; width: auto; }
+
+        @media (max-width: 700px) {
+            header { padding: 2rem 1.2rem 1.5rem; }
+            header h1 { font-size: 1.8rem; }
+            main { padding: 1rem 1.2rem 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="lise-logo">
+    <svg role="img" xmlns="http://www.w3.org/2000/svg" width="71.891" height="31" viewBox="0 0 71.890729 31" aria-label="lise GmbH Logo">
+        <g data-name="leaf">
+            <path fill="#ffffff" d="M70.55 0c-.856-.002-2.081.008-3.56.056-2.955.097-6.533.562-9.546 2.75-3.269 2.374-3.906 5.247-3.46 7.525 0 0-1.404.5-3.283.476v1.959c2.297-.118 4.546-.904 4.546-.904 1.98 1.226 7.362 2.37 11.377.114 3.902-2.194 4.756-6.52 5.103-9.06.18-1.317.163-2.9.163-2.9S71.405.004 70.55 0zm-1.861 1.868c-1.192 1.331-6.163 5.266-12.242 7.583-.044.017-.465-3.233 3.68-5.665 3.358-1.97 8.562-1.918 8.562-1.918Zm1.069.93s-.133 4.79-3.864 7.124c-4.228 2.645-8.234 1.096-8.19 1.08 4.211-1.572 9.248-4.716 12.054-8.204z"/>
+            <path fill="none" d="M68.689 1.868s-5.204-.053-8.563 1.918c-4.144 2.432-3.723 5.682-3.68 5.665 6.08-2.317 11.051-6.252 12.243-7.583Zm1.069.93c-2.806 3.488-7.843 6.632-12.054 8.204-.044.016 3.962 1.565 8.19-1.08 3.731-2.334 3.864-7.124 3.864-7.124z"/>
+        </g>
+        <path fill="#ffffff" data-name="lise" d="M9.716.017h-1.56v5.41h1.56Zm2.094 23.471C11.933 28.414 15.545 31 20.348 31c3.694 0 8.25-1.272 8.25-5.829 0-4.433-3.284-5.418-7.47-6.198-3.407-.739-7.02-1.272-7.02-4.638 0-2.997 3.202-4.064 6.075-4.064 3.53 0 6.198 1.56 6.24 5.377h1.56c0-4.802-3.326-6.731-7.8-6.731-3.57 0-7.634 1.231-7.634 5.418 0 4.31 3.612 5.254 7.265 5.993 3.612.739 7.224 1.272 7.224 4.843 0 3.654-3.94 4.474-6.69 4.474-3.818 0-6.732-2.257-6.978-6.157zm36.687-3.324c.287-6.034-2.668-11.247-9.277-11.247-6.362 0-9.4 5.623-9.317 11.41C29.82 26.158 33.063 31 39.22 31c5.008 0 8.292-2.71 9.113-7.635h-1.56c-.739 3.9-3.571 6.28-7.553 6.28-5.213 0-7.84-4.515-7.758-9.481zm-17.035-1.355c.329-4.187 3.079-8.538 7.758-8.538 4.844 0 7.635 4.105 7.717 8.538zM4.898 31v-1.628c-.44 0-1.693-.147-2.474-.815-.865-.74-.864-2.068-.864-2.54v-26H0v26.267C0 28.06.683 31 4.898 31m-.07-22.063v1.629c.44 0 1.694.146 2.475.814.864.74.863 2.068.863 2.54V31h1.56V13.653c0-1.775-.682-4.716-4.897-4.716"/>
+    </svg>
+</div>
+
+<header>
+    <div class="event-badge">Let's Code</div>
+    <h1>Context Engineering — Handout</h1>
+    <p>Nachschlagewerk für die Übungen. Hier steht, wie Skills, Sub-Agents und MCP-Server bei jedem Tool eingerichtet werden. Klickt auf ein Tool, um die Details aufzuklappen.</p>
+</header>
+
+<main>
+
+    <!-- ============================================================ -->
+    <!-- SKILLS -->
+    <!-- ============================================================ -->
+    <span class="section-label label-green">Skills</span>
+    <h2>Skills einrichten</h2>
+    <p>Ein Skill ist eine Markdown-Datei mit Anweisungen, die der Agent befolgt. Er besteht aus YAML-Frontmatter (Metadaten) und einem Markdown-Body (die Anweisungen selbst).</p>
+
+    <!-- Claude Code -->
+    <div class="tool-section open">
+        <div class="tool-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>Claude Code</h3>
+            <span class="arrow">&#9654;</span>
+        </div>
+        <div class="tool-body">
+            <h4>Wo liegen die Dateien?</h4>
+            <table>
+                <tr><th>Scope</th><th>Pfad</th></tr>
+                <tr><td>Projekt</td><td><code>.claude/skills/&lt;skill-name&gt;/SKILL.md</code></td></tr>
+                <tr><td>Persönlich</td><td><code>~/.claude/skills/&lt;skill-name&gt;/SKILL.md</code></td></tr>
+            </table>
+
+            <h4>Frontmatter-Felder</h4>
+            <table>
+                <tr><th>Feld</th><th>Beschreibung</th></tr>
+                <tr><td><code>name</code></td><td>Name des Slash-Commands (z.B. <code>commit</code> ergibt <code>/commit</code>)</td></tr>
+                <tr><td><code>description</code></td><td>Wann der Skill geladen werden soll (wird dem Agent angezeigt)</td></tr>
+                <tr><td><code>disable-model-invocation</code></td><td><code>true</code> = nur manuell per <code>/name</code> aufrufbar</td></tr>
+                <tr><td><code>tools</code></td><td>Werkzeuge, die der Skill nutzen darf (z.B. <code>Read, Bash</code>)</td></tr>
+                <tr><td><code>context</code></td><td><code>fork</code> = läuft in eigenem Sub-Agent</td></tr>
+            </table>
+
+            <h4>Beispiel</h4>
+            <span class="filename">.claude/skills/email-schreiber/SKILL.md</span>
+            <div class="code-block" style="border-radius: 0 10px 10px 10px;"><span class="cmt">---</span>
+<span class="key">name:</span> <span class="val">email-schreiber</span>
+<span class="key">description:</span> <span class="val">Schreibt professionelle E-Mails. Verwende</span>
+    <span class="val">diesen Skill, wenn eine E-Mail geschrieben</span>
+    <span class="val">werden soll.</span>
+<span class="cmt">---</span>
+
+<span class="h"># E-Mail schreiben</span>
+
+Schreibe eine professionelle E-Mail nach diesen Regeln:
+<span class="val">1.</span> Beginne mit "Hallo [Name],"
+<span class="val">2.</span> Maximal 5 Sätze im Hauptteil
+<span class="val">3.</span> Ende mit "Viele Grüße"</div>
+
+            <h4>Testen</h4>
+            <p>Entweder per Slash-Command: <code>/email-schreiber</code><br>
+            Oder einfach fragen — der Agent erkennt anhand der <code>description</code>, wann der Skill passt.</p>
+        </div>
+    </div>
+
+    <!-- Copilot CLI -->
+    <div class="tool-section">
+        <div class="tool-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>Copilot CLI</h3>
+            <span class="arrow">&#9654;</span>
+        </div>
+        <div class="tool-body">
+            <p>Copilot CLI nennt das Konzept <strong>Agent Skills</strong>. Das Format ist kompatibel mit Claude Code.</p>
+
+            <h4>Wo liegen die Dateien?</h4>
+            <table>
+                <tr><th>Scope</th><th>Pfad</th></tr>
+                <tr><td>Projekt</td><td><code>.github/skills/&lt;skill-name&gt;/SKILL.md</code></td></tr>
+                <tr><td>Persönlich</td><td><code>~/.copilot/skills/&lt;skill-name&gt;/SKILL.md</code></td></tr>
+            </table>
+
+            <h4>Frontmatter-Felder</h4>
+            <table>
+                <tr><th>Feld</th><th>Pflicht</th><th>Beschreibung</th></tr>
+                <tr><td><code>name</code></td><td>Ja</td><td>Eindeutige ID, Kleinbuchstaben mit Bindestrichen</td></tr>
+                <tr><td><code>description</code></td><td>Ja</td><td>Was der Skill tut und wann er verwendet werden soll</td></tr>
+            </table>
+
+            <h4>Testen &amp; Verwalten</h4>
+            <ul class="clean">
+                <li><code>/skill-name</code> — Skill direkt aufrufen</li>
+                <li><code>/skills list</code> — Alle verfügbaren Skills anzeigen</li>
+                <li><code>/skills reload</code> — Skills neu laden nach Änderungen</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Cursor -->
+    <div class="tool-section">
+        <div class="tool-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>Cursor</h3>
+            <span class="arrow">&#9654;</span>
+        </div>
+        <div class="tool-body">
+            <h4>Wo liegen die Dateien?</h4>
+            <table>
+                <tr><th>Scope</th><th>Pfad</th></tr>
+                <tr><td>Projekt</td><td><code>.agents/skills/&lt;skill-name&gt;/SKILL.md</code> oder <code>.cursor/skills/&lt;skill-name&gt;/SKILL.md</code></td></tr>
+                <tr><td>Persönlich</td><td><code>~/.cursor/skills/&lt;skill-name&gt;/SKILL.md</code></td></tr>
+            </table>
+            <p>Das Format ist kompatibel mit Claude Code (gleiche SKILL.md-Struktur mit <code>name</code> und <code>description</code> im Frontmatter).</p>
+        </div>
+    </div>
+
+    <!-- Codex CLI -->
+    <div class="tool-section">
+        <div class="tool-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>Codex CLI</h3>
+            <span class="arrow">&#9654;</span>
+        </div>
+        <div class="tool-body">
+            <h4>Wo liegen die Dateien?</h4>
+            <table>
+                <tr><th>Scope</th><th>Pfad</th></tr>
+                <tr><td>Projekt</td><td><code>.agents/skills/&lt;skill-name&gt;/SKILL.md</code></td></tr>
+            </table>
+            <p>Das Format ist kompatibel mit Claude Code (gleiche SKILL.md-Struktur mit <code>name</code> und <code>description</code> im Frontmatter).</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ============================================================ -->
+    <!-- SUB-AGENTS -->
+    <!-- ============================================================ -->
+    <span class="section-label label-teal">Sub-Agents</span>
+    <h2>Sub-Agents einrichten</h2>
+    <p>Ein Sub-Agent ist ein spezialisierter KI-Assistent mit eigenem System-Prompt, eigenen Werkzeugen und eigenem Modell. Er läuft in einem eigenen Kontext.</p>
+
+    <!-- Claude Code -->
+    <div class="tool-section open">
+        <div class="tool-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>Claude Code</h3>
+            <span class="arrow">&#9654;</span>
+        </div>
+        <div class="tool-body">
+            <h4>Wo liegen die Dateien?</h4>
+            <table>
+                <tr><th>Scope</th><th>Pfad</th></tr>
+                <tr><td>Projekt</td><td><code>.claude/agents/&lt;name&gt;.md</code></td></tr>
+                <tr><td>Persönlich</td><td><code>~/.claude/agents/&lt;name&gt;.md</code></td></tr>
+            </table>
+
+            <h4>Frontmatter-Felder</h4>
+            <table>
+                <tr><th>Feld</th><th>Pflicht</th><th>Beschreibung</th></tr>
+                <tr><td><code>name</code></td><td>Ja</td><td>Eindeutiger Name (Kleinbuchstaben, Bindestriche)</td></tr>
+                <tr><td><code>description</code></td><td>Ja</td><td>Wann der Agent eingesetzt werden soll</td></tr>
+                <tr><td><code>tools</code></td><td>Nein</td><td>Erlaubte Werkzeuge (z.B. <code>Read, Grep, Glob, Bash</code>). Ohne Angabe: alle</td></tr>
+                <tr><td><code>disallowedTools</code></td><td>Nein</td><td>Verbotene Werkzeuge (z.B. <code>Write, Edit</code>)</td></tr>
+                <tr><td><code>model</code></td><td>Nein</td><td><code>sonnet</code>, <code>opus</code>, <code>haiku</code> oder <code>inherit</code> (Standard)</td></tr>
+                <tr><td><code>memory</code></td><td>Nein</td><td><code>user</code>, <code>project</code> oder <code>local</code> — persistenter Speicher über Sessions hinweg</td></tr>
+                <tr><td><code>background</code></td><td>Nein</td><td><code>true</code> = läuft im Hintergrund</td></tr>
+            </table>
+
+            <h4>Beispiel</h4>
+            <span class="filename">.claude/agents/korrekturleser.md</span>
+            <div class="code-block" style="border-radius: 0 10px 10px 10px;"><span class="cmt">---</span>
+<span class="key">name:</span>        <span class="val">korrekturleser</span>
+<span class="key">description:</span> <span class="val">Prüft Texte auf Rechtschreibung und Grammatik.</span>
+<span class="key">tools:</span>       <span class="val">Read, Grep, Glob</span>
+<span class="key">model:</span>       <span class="val">sonnet</span>
+<span class="cmt">---</span>
+
+Du bist ein erfahrener Korrekturleser.
+Prüfe Texte auf Fehler und gib Korrekturvorschläge.
+Verändere den Text NICHT selbst.</div>
+
+            <h4>Aufrufen</h4>
+            <p>Claude delegiert automatisch, wenn die Aufgabe zur <code>description</code> passt. Oder explizit mit <code>@korrekturleser</code> im Chat. Oder per <code>/agents</code> verwalten.</p>
+        </div>
+    </div>
+
+    <!-- Copilot CLI -->
+    <div class="tool-section">
+        <div class="tool-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>Copilot CLI</h3>
+            <span class="arrow">&#9654;</span>
+        </div>
+        <div class="tool-body">
+            <p>Copilot CLI nennt das Konzept <strong>Custom Agents</strong>. Dateien haben die Endung <code>.agent.md</code>.</p>
+
+            <h4>Wo liegen die Dateien?</h4>
+            <table>
+                <tr><th>Scope</th><th>Pfad</th></tr>
+                <tr><td>Projekt</td><td><code>.github/agents/*.agent.md</code></td></tr>
+                <tr><td>Persönlich</td><td><code>~/.copilot/agents/*.agent.md</code></td></tr>
+            </table>
+
+            <h4>Beispiel</h4>
+            <span class="filename">.github/agents/korrekturleser.agent.md</span>
+            <div class="code-block" style="border-radius: 0 10px 10px 10px;"><span class="cmt">---</span>
+<span class="key">name:</span> <span class="val">Korrekturleser</span>
+<span class="key">description:</span> <span class="val">Prüft Texte auf Rechtschreibung und Grammatik</span>
+<span class="cmt">---</span>
+
+Du bist ein erfahrener Korrekturleser.
+Prüfe Texte auf Fehler und gib Korrekturvorschläge.
+Verändere den Text NICHT selbst.</div>
+
+            <h4>Aufrufen</h4>
+            <p>Per <code>/agent</code> im interaktiven Modus. Erstellung auch über <code>/agent</code> &rarr; „Create new agent" möglich.</p>
+        </div>
+    </div>
+
+    <!-- Cursor -->
+    <div class="tool-section">
+        <div class="tool-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>Cursor</h3>
+            <span class="arrow">&#9654;</span>
+        </div>
+        <div class="tool-body">
+            <h4>Wo liegen die Dateien?</h4>
+            <table>
+                <tr><th>Scope</th><th>Pfad</th></tr>
+                <tr><td>Projekt</td><td><code>.cursor/agents/*.md</code></td></tr>
+                <tr><td>Persönlich</td><td><code>~/.cursor/agents/*.md</code></td></tr>
+            </table>
+
+            <h4>Frontmatter-Felder</h4>
+            <table>
+                <tr><th>Feld</th><th>Beschreibung</th></tr>
+                <tr><td><code>name</code></td><td>Anzeigename (Standard: Dateiname)</td></tr>
+                <tr><td><code>description</code></td><td>Wann der Agent delegiert werden soll</td></tr>
+                <tr><td><code>model</code></td><td><code>inherit</code>, <code>fast</code> oder eine spezifische Modell-ID</td></tr>
+                <tr><td><code>readonly</code></td><td><code>true</code> = keine Schreibrechte</td></tr>
+            </table>
+
+            <h4>Beispiel</h4>
+            <span class="filename">.cursor/agents/korrekturleser.md</span>
+            <div class="code-block" style="border-radius: 0 10px 10px 10px;"><span class="cmt">---</span>
+<span class="key">name:</span> <span class="val">korrekturleser</span>
+<span class="key">description:</span> <span class="val">Prüft Texte auf Rechtschreibung und Grammatik</span>
+<span class="key">model:</span> <span class="val">fast</span>
+<span class="key">readonly:</span> <span class="val">true</span>
+<span class="cmt">---</span>
+
+Du bist ein erfahrener Korrekturleser.
+Prüfe Texte auf Fehler und gib Korrekturvorschläge.
+Verändere den Text NICHT selbst.</div>
+        </div>
+    </div>
+
+    <!-- Codex CLI -->
+    <div class="tool-section">
+        <div class="tool-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>Codex CLI</h3>
+            <span class="arrow">&#9654;</span>
+        </div>
+        <div class="tool-body">
+            <h4>Wo liegen die Dateien?</h4>
+            <table>
+                <tr><th>Scope</th><th>Pfad</th></tr>
+                <tr><td>Projekt</td><td><code>.agents/agents/*.md</code></td></tr>
+                <tr><td>Persönlich</td><td><code>~/.agents/agents/*.md</code></td></tr>
+            </table>
+            <p>Das Format ist kompatibel mit Claude Code (gleiche Markdown-Struktur mit Frontmatter + System-Prompt).</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ============================================================ -->
+    <!-- MCP SERVER -->
+    <!-- ============================================================ -->
+    <span class="section-label label-red">MCP-Server</span>
+    <h2>MCP-Server einrichten</h2>
+    <p>Ein MCP-Server ist ein kleines Programm, das zwischen eurem KI-Tool und einem externen Dienst (z.B. Jira, Figma, Slack) vermittelt. So bekommt der Agent Zugang zu Systemen, auf die er sonst keinen Zugriff hätte.</p>
+
+    <h3>Allgemeines Vorgehen</h3>
+    <ul class="clean">
+        <li><strong>Suchen:</strong> Auf GitHub oder npm nach einem MCP-Server für euren Dienst suchen</li>
+        <li><strong>README lesen:</strong> Dort steht der Startbefehl und welche API-Keys/Tokens ihr braucht</li>
+        <li><strong>Konfigurieren:</strong> Den Server in die Konfigurationsdatei eures Tools eintragen</li>
+        <li><strong>Neu starten:</strong> Tool neu starten, damit der MCP-Server verbunden wird</li>
+        <li><strong>Testen:</strong> Dem Agenten eine Frage stellen, die den externen Dienst braucht</li>
+    </ul>
+
+    <!-- Claude Code -->
+    <div class="tool-section open">
+        <div class="tool-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>Claude Code</h3>
+            <span class="arrow">&#9654;</span>
+        </div>
+        <div class="tool-body">
+            <h4>Konfigurationsdatei</h4>
+            <table>
+                <tr><th>Scope</th><th>Pfad</th></tr>
+                <tr><td>Projekt</td><td><code>.mcp.json</code> im Projektstamm</td></tr>
+                <tr><td>Persönlich</td><td>Gespeichert in <code>~/.claude.json</code> (via <code>claude mcp add</code>)</td></tr>
+            </table>
+
+            <h4>Format</h4>
+            <div class="code-block"><span class="cmt">// .mcp.json (im Projektstamm)</span>
+{
+  <span class="key">"mcpServers"</span>: {
+    <span class="val">"name-des-servers"</span>: {
+      <span class="key">"type"</span>:    <span class="val">"stdio"</span>,
+      <span class="key">"command"</span>: <span class="val">"npx"</span>,
+      <span class="key">"args"</span>:    [<span class="val">"paketname"</span>],
+      <span class="key">"env"</span>: {
+        <span class="val">"API_KEY"</span>: <span class="val">"euer-api-key"</span>
+      }
+    }
+  }
+}</div>
+            <p>Oder per CLI: <code>claude mcp add name-des-servers --transport stdio -- npx paketname</code></p>
+        </div>
+    </div>
+
+    <!-- Copilot CLI -->
+    <div class="tool-section">
+        <div class="tool-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>Copilot CLI</h3>
+            <span class="arrow">&#9654;</span>
+        </div>
+        <div class="tool-body">
+            <h4>Konfigurationsdatei</h4>
+            <table>
+                <tr><th>Scope</th><th>Pfad</th></tr>
+                <tr><td>Persönlich</td><td><code>~/.copilot/mcp-config.json</code></td></tr>
+            </table>
+            <p>Alternativ per interaktivem Befehl: <code>/mcp add</code></p>
+
+            <h4>Format</h4>
+            <div class="code-block"><span class="cmt">// ~/.copilot/mcp-config.json</span>
+{
+  <span class="key">"mcpServers"</span>: {
+    <span class="val">"name-des-servers"</span>: {
+      <span class="key">"type"</span>:    <span class="val">"local"</span>,
+      <span class="key">"command"</span>: <span class="val">"npx"</span>,
+      <span class="key">"args"</span>:    [<span class="val">"paketname"</span>],
+      <span class="key">"env"</span>:     {},
+      <span class="key">"tools"</span>:   [<span class="val">"*"</span>]
+    }
+  }
+}</div>
+            <p><strong>Servertypen:</strong> <code>local</code>/<code>stdio</code> für lokale Prozesse, <code>http</code>/<code>sse</code> für Remote-Server. <code>tools</code> auf <code>["*"]</code> für alle, oder spezifische Tool-Namen als Liste.</p>
+        </div>
+    </div>
+
+    <!-- Cursor -->
+    <div class="tool-section">
+        <div class="tool-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>Cursor</h3>
+            <span class="arrow">&#9654;</span>
+        </div>
+        <div class="tool-body">
+            <h4>Konfigurationsdatei</h4>
+            <table>
+                <tr><th>Scope</th><th>Pfad</th></tr>
+                <tr><td>Projekt</td><td><code>.cursor/mcp.json</code></td></tr>
+                <tr><td>Persönlich</td><td><code>~/.cursor/mcp.json</code></td></tr>
+            </table>
+
+            <h4>Format</h4>
+            <div class="code-block"><span class="cmt">// .cursor/mcp.json</span>
+{
+  <span class="key">"mcpServers"</span>: {
+    <span class="val">"name-des-servers"</span>: {
+      <span class="key">"command"</span>: <span class="val">"npx"</span>,
+      <span class="key">"args"</span>:    [<span class="val">"paketname"</span>],
+      <span class="key">"env"</span>: {
+        <span class="val">"API_KEY"</span>: <span class="val">"${env:MY_API_KEY}"</span>
+      }
+    }
+  }
+}</div>
+            <p><strong>Tipp:</strong> Cursor unterstützt <code>${env:NAME}</code> um Secrets aus Umgebungsvariablen zu lesen, statt sie direkt in die Datei zu schreiben.</p>
+        </div>
+    </div>
+
+    <!-- Codex CLI -->
+    <div class="tool-section">
+        <div class="tool-header" onclick="this.parentElement.classList.toggle('open')">
+            <h3>Codex CLI</h3>
+            <span class="arrow">&#9654;</span>
+        </div>
+        <div class="tool-body">
+            <h4>Konfigurationsdatei</h4>
+            <table>
+                <tr><th>Scope</th><th>Pfad</th></tr>
+                <tr><td>Projekt</td><td><code>.codex/config.toml</code></td></tr>
+                <tr><td>Persönlich</td><td><code>~/.codex/config.toml</code></td></tr>
+            </table>
+
+            <h4>Format (TOML)</h4>
+            <div class="code-block"><span class="cmt"># .codex/config.toml</span>
+
+<span class="key">[mcp_servers.name-des-servers]</span>
+<span class="val">command</span>  = <span class="val">"npx"</span>
+<span class="val">args</span>     = [<span class="val">"paketname"</span>]
+<span class="val">env</span>      = { <span class="val">API_KEY</span> = <span class="val">"euer-api-key"</span> }
+<span class="val">enabled</span>  = <span class="val">true</span></div>
+            <p><strong>Hinweis:</strong> Codex nutzt TOML statt JSON. API-Keys können auch über eine Umgebungsvariable referenziert werden: <code>bearer_token_env_var = "MY_API_KEY"</code>.</p>
+        </div>
+    </div>
+
+</main>
+
+</body>
+</html>

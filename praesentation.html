@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Context Engineering — Let's Code</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        :root {
+            --lime: #d5ed00;
+            --teal: #94c6c5;
+            --dark: #1a1a2e;
+            --darker: #0f0f1a;
+            --text: #f0f0f0;
+            --text-muted: #a0a0b0;
+            --slide-transition: 0.5s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--darker);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- Slide System --- */
+        .slide-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem 6rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--slide-transition) ease;
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* --- Background Particles --- */
+        .bg-particles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bg-particles span {
+            position: absolute;
+            border-radius: 50%;
+            animation: float linear infinite;
+            opacity: 0.08;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100px) rotate(720deg); }
+        }
+
+        /* --- Typography --- */
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 2.6rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.2rem;
+            letter-spacing: -0.01em;
+        }
+
+        h3 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+
+        p, li {
+            font-size: 1.35rem;
+            line-height: 1.7;
+            font-weight: 300;
+            color: var(--text-muted);
+        }
+
+        .highlight {
+            color: var(--lime);
+            font-weight: 600;
+        }
+
+        .teal {
+            color: var(--teal);
+        }
+
+        /* --- Slide Layouts --- */
+        .slide-title {
+            text-align: center;
+        }
+
+        .slide-title h1 {
+            font-size: 4.5rem;
+        }
+
+        .slide-title .subtitle {
+            font-size: 1.5rem;
+            color: var(--teal);
+            font-weight: 400;
+            margin-top: 0.5rem;
+        }
+
+        .slide-title .event-badge {
+            display: inline-block;
+            background: var(--lime);
+            color: var(--darker);
+            padding: 0.4rem 1.6rem;
+            border-radius: 100px;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+        }
+
+        .slide-split {
+            flex-direction: row;
+            gap: 4rem;
+            padding: 4rem 5rem;
+        }
+
+        .slide-split .left,
+        .slide-split .right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .slide-center {
+            text-align: center;
+            max-width: 900px;
+        }
+
+        /* --- Cards --- */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .card-grid.three-col {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--lime);
+        }
+
+        .card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            color: var(--text);
+            font-size: 1.3rem;
+        }
+
+        .card p {
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        /* --- Pizza Analogy Visual --- */
+        .analogy-row {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .analogy-card {
+            flex: 1;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 1.8rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .analogy-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 3px;
+        }
+
+        .analogy-card:nth-child(1)::before { background: var(--text-muted); }
+        .analogy-card:nth-child(2)::before { background: var(--teal); }
+        .analogy-card:nth-child(3)::before { background: var(--lime); }
+        .analogy-card:nth-child(4)::before { background: #ff6b6b; }
+
+        .analogy-card .pizza-icon {
+            font-size: 3rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .analogy-card h3 {
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .analogy-card .vs-label {
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.8rem;
+        }
+
+        .analogy-card:nth-child(1) .vs-label { background: rgba(160,160,176,0.2); color: var(--text-muted); }
+        .analogy-card:nth-child(2) .vs-label { background: rgba(148,198,197,0.2); color: var(--teal); }
+        .analogy-card:nth-child(3) .vs-label { background: rgba(213,237,0,0.15); color: var(--lime); }
+        .analogy-card:nth-child(4) .vs-label { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+
+        .analogy-card p {
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        /* --- Comparison Table --- */
+        .comparison {
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 2rem;
+        }
+
+        .comparison-row {
+            display: flex;
+            align-items: stretch;
+            margin-bottom: 0.8rem;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .comparison-label {
+            background: rgba(255,255,255,0.06);
+            padding: 1.2rem 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            width: 220px;
+            display: flex;
+            align-items: center;
+        }
+
+        .comparison-value {
+            background: rgba(255,255,255,0.03);
+            padding: 1.2rem 1.5rem;
+            flex: 1;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+        }
+
+        /* --- Big Emoji --- */
+        .big-emoji {
+            font-size: 6rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- Progress Bar --- */
+        .progress-bar {
+            position: fixed;
+            bottom: 0; left: 0;
+            height: 3px;
+            background: var(--lime);
+            transition: width 0.4s ease;
+            z-index: 100;
+        }
+
+        /* --- Slide Counter --- */
+        .slide-counter {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 2rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            z-index: 100;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* --- Navigation Hint --- */
+        .nav-hint {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 2rem;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.25);
+            z-index: 100;
+        }
+
+        /* --- Arrow Steps --- */
+        .steps {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .step-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            min-width: 160px;
+        }
+
+        .step-item h3 {
+            font-size: 1rem;
+            color: var(--lime);
+            margin-bottom: 0.3rem;
+        }
+
+        .step-item p {
+            font-size: 0.95rem;
+        }
+
+        .step-arrow {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        /* --- Lists --- */
+        ul.clean {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul.clean li {
+            padding: 0.5rem 0;
+            padding-left: 1.8rem;
+            position: relative;
+        }
+
+        ul.clean li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--lime);
+            font-weight: 600;
+        }
+
+        /* --- Quote Block --- */
+        .quote-block {
+            border-left: 4px solid var(--lime);
+            padding: 1.5rem 2rem;
+            background: rgba(213,237,0,0.04);
+            border-radius: 0 12px 12px 0;
+            margin: 1.5rem 0;
+            max-width: 800px;
+        }
+
+        .quote-block p {
+            font-size: 1.4rem;
+            font-style: italic;
+            color: var(--text);
+            font-weight: 400;
+        }
+
+        /* --- Code Example --- */
+        .code-example {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1.8rem 2rem;
+            text-align: left;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-muted);
+            overflow-x: auto;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .code-example .comment {
+            color: #6a6a80;
+        }
+
+        .code-example .key {
+            color: var(--teal);
+        }
+
+        .code-example .value {
+            color: var(--lime);
+        }
+
+        .code-example .heading {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .code-example .filename {
+            display: inline-block;
+            background: rgba(255,255,255,0.08);
+            padding: 0.2rem 0.8rem;
+            border-radius: 6px 6px 0 0;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: -1px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        /* --- Setup Table --- */
+        .setup-table {
+            width: 100%;
+            max-width: 1100px;
+            margin-top: 1.5rem;
+            border-collapse: separate;
+            border-spacing: 0 0.5rem;
+        }
+
+        .setup-table th {
+            text-align: left;
+            padding: 0.8rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+        }
+
+        .setup-table td {
+            padding: 1rem 1.2rem;
+            font-size: 1rem;
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.03);
+            line-height: 1.5;
+        }
+
+        .setup-table tr td:first-child {
+            border-radius: 10px 0 0 10px;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        .setup-table tr td:last-child {
+            border-radius: 0 10px 10px 0;
+        }
+
+        .setup-table code {
+            background: rgba(255,255,255,0.08);
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            color: var(--lime);
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 900px) {
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 2rem; }
+            .slide { padding: 2rem 2.5rem; }
+            .slide-split { flex-direction: column; gap: 2rem; }
+            .card-grid { grid-template-columns: 1fr; }
+            .card-grid.three-col { grid-template-columns: 1fr; }
+            .analogy-row { flex-direction: column; }
+            .slide-title h1 { font-size: 3rem; }
+        }
+
+        /* --- lise Logo --- */
+        .lise-logo {
+            position: fixed;
+            top: 1.8rem;
+            left: 2rem;
+            z-index: 100;
+        }
+
+        .lise-logo svg {
+            height: 28px;
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Background Particles -->
+<div class="bg-particles" id="particles"></div>
+
+<!-- lise Logo -->
+<div class="lise-logo">
+    <svg role="img" xmlns="http://www.w3.org/2000/svg" width="71.891" height="31" viewBox="0 0 71.890729 31" aria-label="lise GmbH Logo">
+        <g data-name="leaf">
+            <path fill="#ffffff" d="M70.55 0c-.856-.002-2.081.008-3.56.056-2.955.097-6.533.562-9.546 2.75-3.269 2.374-3.906 5.247-3.46 7.525 0 0-1.404.5-3.283.476v1.959c2.297-.118 4.546-.904 4.546-.904 1.98 1.226 7.362 2.37 11.377.114 3.902-2.194 4.756-6.52 5.103-9.06.18-1.317.163-2.9.163-2.9S71.405.004 70.55 0zm-1.861 1.868c-1.192 1.331-6.163 5.266-12.242 7.583-.044.017-.465-3.233 3.68-5.665 3.358-1.97 8.562-1.918 8.562-1.918Zm1.069.93s-.133 4.79-3.864 7.124c-4.228 2.645-8.234 1.096-8.19 1.08 4.211-1.572 9.248-4.716 12.054-8.204z"/>
+            <path fill="none" d="M68.689 1.868s-5.204-.053-8.563 1.918c-4.144 2.432-3.723 5.682-3.68 5.665 6.08-2.317 11.051-6.252 12.243-7.583Zm1.069.93c-2.806 3.488-7.843 6.632-12.054 8.204-.044.016 3.962 1.565 8.19-1.08 3.731-2.334 3.864-7.124 3.864-7.124z"/>
+        </g>
+        <path fill="#ffffff" data-name="lise" d="M9.716.017h-1.56v5.41h1.56Zm2.094 23.471C11.933 28.414 15.545 31 20.348 31c3.694 0 8.25-1.272 8.25-5.829 0-4.433-3.284-5.418-7.47-6.198-3.407-.739-7.02-1.272-7.02-4.638 0-2.997 3.202-4.064 6.075-4.064 3.53 0 6.198 1.56 6.24 5.377h1.56c0-4.802-3.326-6.731-7.8-6.731-3.57 0-7.634 1.231-7.634 5.418 0 4.31 3.612 5.254 7.265 5.993 3.612.739 7.224 1.272 7.224 4.843 0 3.654-3.94 4.474-6.69 4.474-3.818 0-6.732-2.257-6.978-6.157zm36.687-3.324c.287-6.034-2.668-11.247-9.277-11.247-6.362 0-9.4 5.623-9.317 11.41C29.82 26.158 33.063 31 39.22 31c5.008 0 8.292-2.71 9.113-7.635h-1.56c-.739 3.9-3.571 6.28-7.553 6.28-5.213 0-7.84-4.515-7.758-9.481zm-17.035-1.355c.329-4.187 3.079-8.538 7.758-8.538 4.844 0 7.635 4.105 7.717 8.538zM4.898 31v-1.628c-.44 0-1.693-.147-2.474-.815-.865-.74-.864-2.068-.864-2.54v-26H0v26.267C0 28.06.683 31 4.898 31m-.07-22.063v1.629c.44 0 1.694.146 2.475.814.864.74.863 2.068.863 2.54V31h1.56V13.653c0-1.775-.682-4.716-4.897-4.716"/>
+    </svg>
+</div>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Slide Counter -->
+<div class="slide-counter" id="slideCounter"></div>
+
+<!-- Nav Hint -->
+<div class="nav-hint">← → oder Pfeiltasten</div>
+
+<!-- ============================================ -->
+<!-- SLIDES -->
+<!-- ============================================ -->
+<div class="slide-container" id="slideContainer">
+
+    <!-- SLIDE 1: Title -->
+    <div class="slide slide-title active">
+        <div class="event-badge">Let's Code</div>
+        <h1>Context Engineering</h1>
+        <p class="subtitle">Wie wir KI-Agenten wirklich schlau machen</p>
+        <p style="margin-top: 2rem; font-size: 1.1rem; color: var(--text-muted);">
+            Tobias Fütterer · lise GmbH · 2026
+        </p>
+    </div>
+
+    <!-- SLIDE 2: Was ist ein KI-Agent? -->
+    <div class="slide slide-center">
+        <div class="big-emoji">🤖</div>
+        <h2>Was ist ein <span class="highlight">KI-Agent</span>?</h2>
+        <p style="max-width: 700px; margin: 0 auto;">
+            Ein KI-Agent ist ein Programm, das <span class="highlight">selbstständig Aufgaben erledigt</span> —
+            es kann Dateien lesen, Code schreiben, E-Mails senden, Daten analysieren und vieles mehr.
+        </p>
+        <p style="max-width: 700px; margin: 1rem auto 0; font-size: 1.15rem;">
+            Stellt euch einen digitalen Assistenten vor, der nicht nur antwortet,
+            sondern eigenständig <span class="teal">handelt</span>.
+        </p>
+    </div>
+
+    <!-- SLIDE 3: Das Problem -->
+    <div class="slide slide-center">
+        <h2>Das Problem</h2>
+        <div class="quote-block">
+            <p>„Mach mir eine Pizza."</p>
+        </div>
+        <p style="max-width: 700px; margin: 1.5rem auto 0;">
+            Wenn wir einem KI-Agenten einfach nur sagen <em>„Mach XY"</em>,
+            ist das wie auf der Straße zu einem Fremden zu gehen und zu sagen:
+        </p>
+        <p style="max-width: 700px; margin: 1rem auto 0; font-size: 1.5rem; color: var(--text); font-weight: 500;">
+            „Back mir eine Pizza."
+        </p>
+        <p style="max-width: 700px; margin: 1.5rem auto 0;">
+            Er kennt euren Geschmack nicht. Er hat kein Rezept. Er hat keine Küche.<br>
+            <span class="highlight">Irgendwas</span> wird rauskommen — aber wahrscheinlich nicht das, was ihr wolltet.
+        </p>
+        <p style="max-width: 700px; margin: 2rem auto 0; font-size: 1.2rem; color: var(--teal);">
+            Wie wir das ändern können — genau darum geht es heute.
+        </p>
+    </div>
+
+    <!-- SLIDE 4: Was ist Context Engineering? -->
+    <div class="slide slide-center">
+        <h2>Was ist <span class="highlight">Context Engineering</span>?</h2>
+        <p style="max-width: 750px; margin: 0 auto 2rem;">
+            Context Engineering bedeutet, dem KI-Agenten alles mitzugeben, was er braucht, um <span class="highlight">gute Ergebnisse</span> zu liefern:
+            Wissen, Werkzeuge, Regeln und Kontext.
+        </p>
+        <div class="card-grid">
+            <div class="card">
+                <div class="icon">📋</div>
+                <h3>Wissen</h3>
+                <p>Hintergrundinfos, Dokumentation, Stil-Vorgaben — alles, was der Agent wissen muss.</p>
+            </div>
+            <div class="card">
+                <div class="icon">🔧</div>
+                <h3>Werkzeuge</h3>
+                <p>Zugriff auf Dateien, APIs, Datenbanken — die Hände des Agenten.</p>
+            </div>
+            <div class="card">
+                <div class="icon">📏</div>
+                <h3>Regeln</h3>
+                <p>Vorgaben wie etwas gemacht werden soll — Qualität, Format, Grenzen.</p>
+            </div>
+            <div class="card">
+                <div class="icon">🎯</div>
+                <h3>Kontext</h3>
+                <p>Was wurde schon gemacht? Was ist das Ziel? Wer ist die Zielgruppe?</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: Was ist der Context? -->
+    <div class="slide slide-center">
+        <h2>Was ist der <span class="highlight">Context</span>?</h2>
+        <p style="max-width: 750px; margin: 0 auto 2rem;">
+            Der Context ist alles, was der Agent <span class="highlight">in einem Gespräch sehen kann</span> —
+            sein gesamtes Arbeitsgedächtnis. Stellt euch ein Whiteboard vor, auf das alles geschrieben wird.
+        </p>
+        <div class="card-grid">
+            <div class="card">
+                <div class="icon">💬</div>
+                <h3>Eure Nachrichten</h3>
+                <p>Jeder Prompt und jede Antwort — die gesamte Konversation.</p>
+            </div>
+            <div class="card">
+                <div class="icon">📄</div>
+                <h3>System-Prompt</h3>
+                <p>Unsichtbare Anweisungen, die das Verhalten des Agenten steuern.</p>
+            </div>
+            <div class="card">
+                <div class="icon">🔍</div>
+                <h3>Tool-Ergebnisse</h3>
+                <p>Alles, was der Agent liest, sucht oder abfragt — Dateien, APIs, Datenbanken.</p>
+            </div>
+            <div class="card">
+                <div class="icon">🧩</div>
+                <h3>Geladene Skills & Regeln</h3>
+                <p>CLAUDE.md, Skills, Agent-Definitionen — alles wird in den Context geladen.</p>
+            </div>
+        </div>
+        <p style="margin-top: 2rem; max-width: 750px; font-size: 1.15rem;">
+            Der Context hat ein <span class="highlight">Limit</span> — das Context Window.
+            Je besser wir steuern, was reinkommt, desto bessere Ergebnisse bekommen wir.
+            Das ist <span class="teal">Context Engineering</span>.
+        </p>
+    </div>
+
+    <!-- SLIDE 6: Die Pizza-Analogie -->
+    <div class="slide" style="align-items: center; text-align: center;">
+        <h2>Die Pizza-Analogie 🍕</h2>
+        <p style="margin-bottom: 1rem; max-width: 800px;">Vier Wege, wie ihr einen KI-Agenten einsetzen könnt — erklärt am Beispiel Pizza.</p>
+        <div class="analogy-row">
+            <div class="analogy-card">
+                <div class="pizza-icon">🙋‍♂️🍕</div>
+                <div class="vs-label">Ohne Kontext</div>
+                <h3>Einfach drauflos</h3>
+                <p>Ihr geht auf die Straße zu einem Fremden und sagt: <em>„Back mir eine Pizza."</em></p>
+                <p style="margin-top: 0.8rem; color: var(--text-muted); font-size: 0.9rem;">→ Ergebnis: unvorhersehbar</p>
+            </div>
+            <div class="analogy-card">
+                <div class="pizza-icon">📜🍕</div>
+                <div class="vs-label">Mit Skills</div>
+                <h3>Mit Rezept</h3>
+                <p>Ihr drückt dem Fremden ein <strong>Rezept</strong> in die Hand und sagt: <em>„Hier, mach mir eine Pizza."</em></p>
+                <p style="margin-top: 0.8rem; color: var(--teal); font-size: 0.9rem;">→ Ergebnis: deutlich besser</p>
+            </div>
+            <div class="analogy-card">
+                <div class="pizza-icon">👨‍🍳🍕</div>
+                <div class="vs-label">Mit Sub-Agents</div>
+                <h3>Beim Pizzabäcker</h3>
+                <p>Ihr geht direkt zum <strong>Pizzabäcker</strong> (Spezialist) und sagt: <em>„Mach mir eine Pizza."</em></p>
+                <p style="margin-top: 0.8rem; color: var(--lime); font-size: 0.9rem;">→ Ergebnis: Profi-Qualität</p>
+            </div>
+            <div class="analogy-card">
+                <div class="pizza-icon">📱🍕</div>
+                <div class="vs-label">Mit MCP-Server</div>
+                <h3>Mit Handy</h3>
+                <p>Ihr drückt dem Fremden ein <strong>Handy</strong> in die Hand — er kann googeln, wie man Pizza macht.</p>
+                <p style="margin-top: 0.8rem; color: #ff6b6b; font-size: 0.9rem;">→ Ergebnis: flexibel & lernfähig</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE: CLAUDE.md erklärt -->
+    <div class="slide slide-split">
+        <div class="left">
+            <h2><span style="color: #c084fc;">CLAUDE.md</span> — Die Hausordnung</h2>
+            <p style="margin-bottom: 1.5rem;">
+                Die <code>CLAUDE.md</code> ist die <strong>zentrale Konfigurationsdatei</strong> für den Agenten.
+                Wie eine Hausordnung definiert sie Regeln, Konventionen und Wissen, die <em>immer</em> gelten.
+            </p>
+            <ul class="clean">
+                <li>Wird automatisch beim Start geladen</li>
+                <li>Definiert Projekt-Konventionen und Coding-Standards</li>
+                <li>Enthält wichtiges Hintergrundwissen zum Projekt</li>
+                <li>Gilt für jede Konversation — ohne dass ihr es wiederholen müsst</li>
+            </ul>
+        </div>
+        <div class="right">
+            <div class="card" style="background: rgba(192,132,252,0.05); border-color: rgba(192,132,252,0.2);">
+                <h3 style="color: #c084fc;">Beispiel</h3>
+                <p style="font-size: 1.1rem;">
+                    <strong>„Antworte immer auf Deutsch"</strong><br><br>
+                    In der CLAUDE.md steht z.B.:<br>
+                    → Sprache: Deutsch<br>
+                    → Framework: React + TypeScript<br>
+                    → Tests vor jedem Commit<br>
+                    → Keine console.log im Prod-Code<br><br>
+                    <em>Ohne CLAUDE.md fragt der Agent jedes Mal neu.</em>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE: CLAUDE.md — Wo lebt sie? -->
+    <div class="slide" style="align-items: center;">
+        <h2>Wo lebt die <span style="color: #c084fc;">CLAUDE.md</span>?</h2>
+        <p style="margin-bottom: 0.5rem; max-width: 800px;">Die CLAUDE.md kann auf mehreren Ebenen existieren — sie werden alle zusammen geladen.</p>
+        <table class="setup-table">
+            <tr>
+                <th style="width: 160px;">Kontext</th>
+                <th>Wo?</th>
+                <th>Wie?</th>
+            </tr>
+            <tr>
+                <td>User</td>
+                <td><code>~/.claude/CLAUDE.md</code></td>
+                <td>Persönliche Regeln, die in allen Projekten gelten</td>
+            </tr>
+            <tr>
+                <td>Projekt</td>
+                <td><code>CLAUDE.md</code></td>
+                <td>Projekt-Regeln, die fürs ganze Team gelten</td>
+            </tr>
+            <tr>
+                <td>Unterordner</td>
+                <td><code>src/CLAUDE.md</code></td>
+                <td>Spezifische Regeln für bestimmte Bereiche des Projekts</td>
+            </tr>
+        </table>
+        <p style="margin-top: 1.5rem; font-size: 1.1rem; color: #c084fc;">
+            Alle Ebenen werden <strong>zusammengeführt</strong> — von allgemein (User) bis spezifisch (Unterordner).
+        </p>
+    </div>
+
+    <!-- SLIDE: CLAUDE.md Beispiel -->
+    <div class="slide" style="align-items: center;">
+        <h2>So sieht eine <span style="color: #c084fc;">CLAUDE.md</span> aus</h2>
+        <p style="margin-bottom: 1rem; max-width: 800px;">Eine einfache Markdown-Datei im Projekt-Root — kein Frontmatter nötig.</p>
+        <span class="code-example filename">CLAUDE.md</span>
+        <div class="code-example" style="border-radius: 0 12px 12px 12px; white-space: pre; line-height: 1.8;">
+<span class="heading"># Projekt: Meine Web-App</span>
+
+<span class="heading">## Sprache & Stil</span>
+ <span class="value">-</span> Antworte immer auf <span class="heading">Deutsch</span>
+ <span class="value">-</span> Verwende <span class="key">TypeScript</span> mit strikten Typen
+ <span class="value">-</span> Kein <span class="key">`any`</span> — immer konkrete Typen
+
+<span class="heading">## Architektur</span>
+ <span class="value">-</span> Frontend: <span class="key">React</span> + <span class="key">styled-components</span>
+ <span class="value">-</span> Backend: <span class="key">Node.js</span> + <span class="key">Express</span>
+ <span class="value">-</span> Tests: <span class="key">Jest</span> + <span class="key">Testing Library</span>
+
+<span class="heading">## Regeln</span>
+ <span class="value">-</span> Vor jedem Commit: <span class="key">`npm test`</span> ausführen
+ <span class="value">-</span> Keine <span class="key">`console.log`</span> im Produktiv-Code
+ <span class="value">-</span> Komponenten immer als Function Components</div>
+        <p style="margin-top: 1.2rem; font-size: 1rem; color: var(--text-muted);">
+            Einfach Markdown — der Agent liest es <span style="color: #c084fc;">automatisch</span> bei jedem Start.
+        </p>
+    </div>
+
+    <!-- SLIDE: Skills erklärt -->
+    <div class="slide slide-split">
+        <div class="left">
+            <h2><span class="highlight">Skills</span> — Das Rezept</h2>
+            <p style="margin-bottom: 1.5rem;">
+                Ein Skill ist eine <strong>wiederverwendbare Anleitung</strong> für den KI-Agenten.
+                Wie ein Rezept beschreibt er Schritt für Schritt, was zu tun ist.
+            </p>
+            <ul class="clean">
+                <li>Vorgeschriebene Arbeitsabläufe</li>
+                <li>Qualitätsstandards eingebaut</li>
+                <li>Einmal erstellt, immer wieder nutzbar</li>
+                <li>Kann von jedem verwendet werden — ohne Technik-Wissen</li>
+            </ul>
+        </div>
+        <div class="right">
+            <div class="card" style="background: rgba(213,237,0,0.05); border-color: rgba(213,237,0,0.2);">
+                <h3 style="color: var(--lime);">Beispiel</h3>
+                <p style="font-size: 1.1rem;">
+                    <strong>„Erstelle einen Commit"</strong><br><br>
+                    Der Skill sorgt automatisch dafür, dass:<br>
+                    → Tests vorher laufen<br>
+                    → Die Nachricht auf Deutsch ist<br>
+                    → Das richtige Format eingehalten wird<br><br>
+                    <em>Ohne den Skill macht der Agent es „irgendwie".</em>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: Skills einrichten -->
+    <div class="slide" style="align-items: center;">
+        <h2>Wo leben <span class="highlight">Skills</span>?</h2>
+        <p style="margin-bottom: 0.5rem; max-width: 800px;">Skills können auf zwei Ebenen angelegt werden — als persönliche Skills oder als Team-Skills im Projekt.</p>
+        <table class="setup-table">
+            <tr>
+                <th style="width: 160px;">Kontext</th>
+                <th>Wo?</th>
+                <th>Wie?</th>
+            </tr>
+            <tr>
+                <td>User</td>
+                <td><code>~/.claude/skills/</code></td>
+                <td>Persönliche Skills, die in allen Projekten verfügbar sind</td>
+            </tr>
+            <tr>
+                <td>Projekt</td>
+                <td><code>.claude/skills/</code></td>
+                <td>Team-Skills, die mit dem Projekt versioniert und geteilt werden</td>
+            </tr>
+        </table>
+        <p style="margin-top: 1.5rem; font-size: 1.1rem; color: var(--teal);">
+            Skills sind <strong>Textdateien</strong> — kein Code, keine Installation. Projekt-Skills werden ins Repo committed.
+        </p>
+    </div>
+
+    <!-- SLIDE 8: Skill-Datei Beispiel -->
+    <div class="slide" style="align-items: center;">
+        <h2>So sieht ein <span class="highlight">Skill</span> aus</h2>
+        <p style="margin-bottom: 1rem; max-width: 800px;">Ein Ordner mit einer <code>SKILL.md</code> — oben Metadaten, unten die Anweisungen.</p>
+        <span class="code-example filename">.claude/skills/commit-messages/SKILL.md</span>
+        <div class="code-example" style="border-radius: 0 12px 12px 12px; white-space: pre; line-height: 1.8;">
+<span class="comment">---</span>
+<span class="key">name:</span>        <span class="value">commit-messages</span>
+<span class="key">description:</span> <span class="value">Erstellt standardisierte Commit-Messages.</span>
+               <span class="value">Verwende diesen Skill immer, wenn ein</span>
+               <span class="value">Commit erstellt werden soll.</span>
+<span class="comment">---</span>
+
+<span class="heading"># Commit-Messages erstellen</span>
+
+Wende diesen Skill an, wenn Commits erstellt werden sollen.
+
+<span class="heading">## Vorgehen</span>
+ <span class="value">1.</span> Prüfe mit <span class="key">`npm test`</span>, ob alle Tests bestehen
+ <span class="value">2.</span> Schreibe die Commit-Message auf <span class="heading">Deutsch</span>
+ <span class="value">3.</span> Verwende <span class="heading">Präsens</span> ("Füge hinzu", nicht "Hinzugefügt")
+ <span class="value">4.</span> Maximal <span class="heading">200 Zeichen</span>
+ <span class="value">5.</span> Kein Co-Authored-By Header</div>
+        <p style="margin-top: 1.2rem; font-size: 1rem; color: var(--text-muted);">
+            <span class="highlight">name</span> = der <code>/slash-command</code> Name &nbsp;&middot;&nbsp;
+            <span class="highlight">description</span> = wann der Skill automatisch geladen wird
+        </p>
+    </div>
+
+    <!-- SLIDE 9: Sub-Agents erklärt -->
+    <div class="slide slide-split">
+        <div class="left">
+            <h2><span class="teal">Sub-Agents</span> — Der Pizzabäcker</h2>
+            <p style="margin-bottom: 1.5rem;">
+                Ein Sub-Agent ist ein <strong>konfigurierbarer Spezialist</strong> — eine Markdown-Datei,
+                die einen eigenen KI-Assistenten definiert: mit eigenem System-Prompt,
+                eigenen Werkzeugen und eigenem Modell.
+            </p>
+            <ul class="clean">
+                <li>Läuft in eigenem Kontext — belastet nicht eure Hauptsession</li>
+                <li>Bekommt nur die Werkzeuge, die er braucht</li>
+                <li>Kann ein anderes (schnelleres/günstigeres) Modell nutzen</li>
+                <li>Wird automatisch aufgerufen, wenn die Aufgabe passt</li>
+            </ul>
+        </div>
+        <div class="right">
+            <div class="card" style="background: rgba(148,198,197,0.05); border-color: rgba(148,198,197,0.2);">
+                <h3 style="color: var(--teal);">Beispiele</h3>
+                <p style="font-size: 1.1rem;">
+                    <strong>Code-Reviewer</strong><br>
+                    → Darf nur lesen, nicht schreiben<br>
+                    → Prüft auf Fehler und Stil<br><br>
+                    <strong>Debugger</strong><br>
+                    → Analysiert Fehler und Stack-Traces<br>
+                    → Kann Code ändern, um Bugs zu fixen<br><br>
+                    <em>Wie Spezialisten in einer Pizzeria: Teigmacher, Ofenmeister, Garnierer.</em>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: Sub-Agents einrichten -->
+    <div class="slide" style="align-items: center;">
+        <h2>Wo leben <span class="teal">Sub-Agents</span>?</h2>
+        <p style="margin-bottom: 0.5rem; max-width: 800px;">Sub-Agents sind Markdown-Dateien mit Frontmatter — persönlich oder im Projekt.</p>
+        <table class="setup-table">
+            <tr>
+                <th style="width: 160px;">Kontext</th>
+                <th>Wo?</th>
+                <th>Wie?</th>
+            </tr>
+            <tr>
+                <td>User</td>
+                <td><code>~/.claude/agents/</code></td>
+                <td>Persönliche Agenten, die in allen Projekten verfügbar sind</td>
+            </tr>
+            <tr>
+                <td>Projekt</td>
+                <td><code>.claude/agents/</code></td>
+                <td>Team-Agenten, die mit dem Projekt versioniert und geteilt werden</td>
+            </tr>
+        </table>
+        <p style="margin-top: 1.5rem; font-size: 1.1rem; color: var(--teal);">
+            <strong>Markdown-Datei</strong> mit System-Prompt + Werkzeuge + Modell. Projekt-Agenten werden ins Repo committed.
+        </p>
+    </div>
+
+    <!-- SLIDE 11: Sub-Agent-Datei Beispiel -->
+    <div class="slide" style="align-items: center;">
+        <h2>So sieht ein <span class="teal">Sub-Agent</span> aus</h2>
+        <p style="margin-bottom: 1rem; max-width: 800px;">Eine Markdown-Datei definiert den Spezialisten — Frontmatter konfiguriert, Body instruiert.</p>
+        <span class="code-example filename">.claude/agents/code-reviewer.md</span>
+        <div class="code-example" style="border-radius: 0 12px 12px 12px; white-space: pre; line-height: 1.8;">
+<span class="comment">---</span>
+<span class="key">name:</span>        <span class="value">code-reviewer</span>
+<span class="key">description:</span> <span class="value">Prüft Code auf Qualität und Best Practices.</span>
+               <span class="value">Verwende nach Code-Änderungen.</span>
+<span class="key">tools:</span>       <span class="value">Read, Grep, Glob, Bash</span>
+<span class="key">model:</span>       <span class="value">sonnet</span>
+<span class="comment">---</span>
+
+Du bist ein erfahrener Code-Reviewer.
+
+<span class="heading">## Vorgehen</span>
+ <span class="value">1.</span> Führe <span class="key">`git diff`</span> aus, um Änderungen zu sehen
+ <span class="value">2.</span> Prüfe auf logische Fehler und Sicherheitsprobleme
+ <span class="value">3.</span> Bewerte Lesbarkeit und Namensgebung
+ <span class="value">4.</span> Gib konkretes, umsetzbares Feedback
+
+<span class="heading">## Ausgabeformat</span>
+ <span class="value">-</span> <span class="heading">Kritisch</span>: Muss behoben werden
+ <span class="value">-</span> <span class="heading">Warnung</span>: Sollte behoben werden
+ <span class="value">-</span> <span class="heading">Vorschlag</span>: Kann verbessert werden</div>
+        <p style="margin-top: 1.2rem; font-size: 1rem; color: var(--text-muted);">
+            <span class="highlight">tools</span> = nur Lese-Zugriff &nbsp;&middot;&nbsp;
+            <span class="highlight">model</span> = schnelleres Modell spart Kosten
+        </p>
+    </div>
+
+    <!-- SLIDE 12: MCP-Server erklärt -->
+    <div class="slide slide-split">
+        <div class="left">
+            <h2><span style="color: #ff6b6b;">MCP-Server</span> — Das Handy</h2>
+            <p style="margin-bottom: 1.5rem;">
+                Ein MCP-Server gibt dem Agenten <strong>Zugang zu externen Informationen und Systemen</strong> —
+                wie ein Handy, mit dem er googeln, nachschlagen und kommunizieren kann.
+            </p>
+            <ul class="clean">
+                <li>Verbindung zu Datenbanken, APIs, Services</li>
+                <li>Zugriff auf aktuelle Informationen</li>
+                <li>Kann mit anderen Systemen interagieren</li>
+                <li>Erweitert die Fähigkeiten des Agenten dynamisch</li>
+            </ul>
+        </div>
+        <div class="right">
+            <div class="card" style="background: rgba(255,107,107,0.05); border-color: rgba(255,107,107,0.2);">
+                <h3 style="color: #ff6b6b;">Beispiel</h3>
+                <p style="font-size: 1.1rem;">
+                    <strong>„GitHub MCP-Server"</strong><br><br>
+                    Der Agent kann damit:<br>
+                    → Issues lesen und erstellen<br>
+                    → Pull Requests prüfen<br>
+                    → Repository-Infos abrufen<br><br>
+                    <em>Ohne MCP-Server kennt er nur das, was man ihm direkt sagt.</em>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 11: MCP-Server einrichten -->
+    <div class="slide" style="align-items: center;">
+        <h2>Wo leben <span style="color: #ff6b6b;">MCP-Server</span>?</h2>
+        <p style="margin-bottom: 0.5rem; max-width: 800px;">MCP-Server werden als externe Dienste konfiguriert — persönlich oder im Projekt.</p>
+        <table class="setup-table">
+            <tr>
+                <th style="width: 160px;">Kontext</th>
+                <th>Wo?</th>
+                <th>Wie?</th>
+            </tr>
+            <tr>
+                <td>User</td>
+                <td><code>~/.claude/settings.json</code></td>
+                <td>Persönliche MCP-Server, die in allen Projekten verfügbar sind</td>
+            </tr>
+            <tr>
+                <td>Projekt</td>
+                <td><code>.mcp.json</code></td>
+                <td>Team-MCP-Server, die mit dem Projekt versioniert und geteilt werden</td>
+            </tr>
+        </table>
+        <p style="margin-top: 1.5rem; font-size: 1.1rem; color: #ff6b6b;">
+            MCP-Server laufen lokal oder remote. Projekt-Server werden unter <code>"mcpServers"</code> in der Settings-Datei eingetragen.
+        </p>
+    </div>
+
+    <!-- SLIDE: CLI Tools als Alternative -->
+    <div class="slide slide-center">
+        <h2><span style="color: #ff6b6b;">CLI Tools</span> als Alternative</h2>
+        <p style="max-width: 750px; font-size: 1.2rem; margin-top: 2rem;">
+            Für die allermeisten MCP-Server gibt es auch ein <strong>CLI Tool</strong> als Alternative —
+            z.B. <code>gh</code> statt GitHub-MCP, <code>jira</code> statt Jira-MCP, <code>curl</code> statt HTTP-MCP.
+        </p>
+        <p style="max-width: 750px; font-size: 1.1rem; margin-top: 1.5rem; color: var(--text-muted);">
+            Der Agent kann diese Tools direkt über die Shell aufrufen — ganz ohne Server-Setup.
+            Oft reicht das völlig aus, bevor man einen MCP-Server aufsetzt.
+        </p>
+    </div>
+
+    <!-- SLIDE 12: Zusammenfassung Analogie -->
+    <div class="slide slide-center">
+        <h2>Alles zusammen 🍕</h2>
+        <div class="comparison" style="margin-top: 2rem;">
+            <div class="comparison-row">
+                <div class="comparison-label">🙋 Ohne Kontext</div>
+                <div class="comparison-value">Fremder auf der Straße → unvorhersehbares Ergebnis</div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-label" style="color: var(--teal);">📜 Skill</div>
+                <div class="comparison-value">Rezept in die Hand drücken → standardisiertes Ergebnis</div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-label" style="color: var(--lime);">👨‍🍳 Sub-Agent</div>
+                <div class="comparison-value">Direkt zum Profi gehen → Experten-Ergebnis</div>
+            </div>
+            <div class="comparison-row">
+                <div class="comparison-label" style="color: #ff6b6b;">📱 MCP-Server</div>
+                <div class="comparison-value">Handy zum Nachschlagen → flexibles, informiertes Ergebnis</div>
+            </div>
+        </div>
+        <p style="margin-top: 2.5rem; max-width: 700px; font-size: 1.2rem;">
+            <span class="highlight">Context Engineering</span> = Die Kunst, diese Bausteine so zu kombinieren,<br>
+            dass der Agent genau das liefert, was ihr braucht.
+        </p>
+    </div>
+
+    <!-- SLIDE 10: Warum ist das wichtig? -->
+    <div class="slide slide-center">
+        <h2>Warum ist das <span class="highlight">wichtig</span>?</h2>
+        <div class="card-grid three-col" style="margin-top: 2rem;">
+            <div class="card">
+                <div class="icon">⏱️</div>
+                <h3>Zeitersparnis</h3>
+                <p>Wiederkehrende Aufgaben automatisieren — in jedem Bereich.</p>
+            </div>
+            <div class="card">
+                <div class="icon">✅</div>
+                <h3>Qualität</h3>
+                <p>Konsistente Ergebnisse statt „jedes Mal anders".</p>
+            </div>
+            <div class="card">
+                <div class="icon">🧠</div>
+                <h3>Wissen bewahren</h3>
+                <p>Team-Wissen in Skills und Agenten festhalten — für alle zugänglich.</p>
+            </div>
+        </div>
+        <p style="margin-top: 2rem; max-width: 750px;">
+            Das gilt nicht nur für Entwickler. <span class="highlight">Marketing, Finanzen, HR</span> —
+            überall gibt es Prozesse, die von gutem Context Engineering profitieren.
+        </p>
+    </div>
+
+    <!-- SLIDE 11: Hands-on Ankündigung -->
+    <div class="slide slide-title">
+        <div class="big-emoji">🛠️</div>
+        <h1>Jetzt seid <span class="highlight">ihr</span> dran!</h1>
+        <p class="subtitle" style="max-width: 700px; margin: 0 auto;">
+            Im nächsten Teil probieren wir das Ganze zusammen aus —<br>
+            Skills erstellen, Agenten konfigurieren und Context Engineering in der Praxis erleben.
+        </p>
+        <div class="steps" style="margin-top: 3rem;">
+            <div class="step-item">
+                <h3>1. Ausprobieren</h3>
+                <p>Erste Schritte mit KI-Agenten</p>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-item">
+                <h3>2. Skills bauen</h3>
+                <p>Eigene Rezepte erstellen</p>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-item">
+                <h3>3. Agenten nutzen</h3>
+                <p>Spezialisten konfigurieren</p>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-item">
+                <h3>4. Kombinieren</h3>
+                <p>Context Engineering anwenden</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 12: Let's go -->
+    <div class="slide slide-title">
+        <div class="event-badge">Let's Code</div>
+        <h1>Let's go! 🚀</h1>
+        <p class="subtitle">Fragen? Einfach fragen.</p>
+    </div>
+
+</div>
+
+<script>
+    // --- Particle Background ---
+    (function() {
+        const container = document.getElementById('particles');
+        const colors = ['#d5ed00', '#94c6c5', '#ffffff'];
+        for (let i = 0; i < 25; i++) {
+            const span = document.createElement('span');
+            const size = Math.random() * 6 + 2;
+            span.style.width = size + 'px';
+            span.style.height = size + 'px';
+            span.style.left = Math.random() * 100 + '%';
+            span.style.background = colors[Math.floor(Math.random() * colors.length)];
+            span.style.animationDuration = (Math.random() * 20 + 15) + 's';
+            span.style.animationDelay = (Math.random() * 10) + 's';
+            container.appendChild(span);
+        }
+    })();
+
+    // --- Slide Navigation ---
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const slideCounter = document.getElementById('slideCounter');
+    let currentSlide = 0;
+
+    function updateSlide(index) {
+        if (index < 0 || index >= slides.length) return;
+        slides[currentSlide].classList.remove('active');
+        currentSlide = index;
+        slides[currentSlide].classList.add('active');
+        progressBar.style.width = ((currentSlide + 1) / slides.length * 100) + '%';
+        slideCounter.textContent = (currentSlide + 1) + ' / ' + slides.length;
+    }
+
+    function nextSlide() { updateSlide(currentSlide + 1); }
+    function prevSlide() { updateSlide(currentSlide - 1); }
+
+    // Keyboard
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            nextSlide();
+        }
+        if (e.key === 'ArrowLeft' || e.key === 'Backspace') {
+            e.preventDefault();
+            prevSlide();
+        }
+        if (e.key === 'Home') { e.preventDefault(); updateSlide(0); }
+        if (e.key === 'End') { e.preventDefault(); updateSlide(slides.length - 1); }
+    });
+
+    // Touch
+    let touchStartX = 0;
+    document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+    document.addEventListener('touchend', (e) => {
+        const diff = touchStartX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) {
+            diff > 0 ? nextSlide() : prevSlide();
+        }
+    });
+
+    // Click areas
+    document.addEventListener('click', (e) => {
+        const x = e.clientX / window.innerWidth;
+        if (x > 0.75) nextSlide();
+        else if (x < 0.25) prevSlide();
+    });
+
+    // Init
+    updateSlide(0);
+</script>
+
+</body>
+</html>
